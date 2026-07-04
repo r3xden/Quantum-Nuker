@@ -11,6 +11,7 @@ MAX_MESSAGES_PER_CHANNEL_SESSION = 50
 RANDOM_NICKNAMES = [
     "pussyeater", "rexdennuker", "nuked", "fuckyourmother", "ownerpussy", 
     "lemmefuckdiscord", "lemmeputdickinsideit", "sex", "fucktheserver", "masssex", "ass", "tity", "ifucku", "shit", "nuked", "hahaha", "bitch", "vagina", "horny", "shity",
+    "condom", "fuck", "anal", "xxx", "wild", "iownu", "kneeme", "squirting", "sensations", "vulgars", "boobs", "rape", "raped",
 ]
 
 LOG_LEVEL = "INFO"

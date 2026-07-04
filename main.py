@@ -25,13 +25,13 @@ async def main():
     engine = NukerEngine()
 
     bot_token = None
-    while not bot_token:
+    while not bot:  # Fixed: changed 'bot_token' to 'bot' to match the code logic
         bot_token = await get_user_input("Enter YOUR Bot Token (The secret key)", input_type=str)
         if bot_token:
             print(f"Attempting login with token...")
             await engine.initialize_bot(bot_token)
             break
-          
+
     guild_id = None
     while not guild_id:
         try:

@@ -10,13 +10,11 @@ Use this tool ONLY on servers you intend to wreck or on test environments!
 
 # Features
 
-1. **Total Deletion:** Removes all visible channels (text/voice) and categories.
-2. **Role Purge:** Sweeps the server clean of roles, making it impossible for standard users to gain elevated status.
-3. **Webhook Massacre:** Deletes every single registered webhook.
-4. **Mass Ban:** Iterates through members and forcibly bans virtually everyone present.
-5. **Server Renaming:** Sets the guild name to "RexdenNuker". (Handled via the deletion module's operations).
-6. **Bloat Factory:** Spawns an overwhelming number of bizarre, spam-themed channels instantly.
-7. **Endless Spam Flood:** Executes a continuous ping loop hitting `@everyone` and `@here`, constantly spamming the specified message until manually stopped (Ctrl+C).
+The tool performs a continuous, no-mercy assault on the specified guild through four primary phases:
+1. **Mass Ban:** Iteratively bans every member found in the server until forced to stop by permissions or rate limits.
+2. **Mass Destruction:** Deletes all existing roles and systematically strips out text/voice channels, along with deleting associated webhooks.
+3. **Mass Creation:** Rapidly spams the guild by creating a large volume of randomized spamming channels and roles using predefined keywords (e.g., "pussyeater", "fuckyou", etc.).
+4. **Mass Ping Storm:** Continuously sends an overwhelming barrage of `@everyone` / `@here` pings into all relevant target channels, aiming for extreme message throughput (simulated up to 1k messages per 5 seconds burst).
 
 ---
 
